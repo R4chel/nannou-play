@@ -7,13 +7,36 @@ fn main() {
 /* MODEL */
 struct Model {
     debug: bool,
+    charges: Vec<Charge>,
+    scalingFactor: f32,
 }
 
 fn model(_app: &App) -> Model {
-    Model { debug: false }
+    Model {
+        debug: false,
+        scalingFactor: 10.,
+        charges: vec![],
+    }
 }
 
-struct Direction {}
+struct Charge {
+    p: Point2,
+    charge: f32,
+}
+
+impl Charge {
+    fn strengthAtPoint(&self, p: Point2) -> Vec2 {
+        let distance = self.p.distance(p);
+        let strength = self.charge / (distance.pow(2));
+        pt2(
+            strength * (p.x - self.p.x) / distance,
+            strength * (p.y - self.p.y) / distance,
+        )
+    }
+}
+struct Direction {
+    v: Vec2,
+}
 
 impl Direction {
     fn apply(&self, p: Point2) -> Point2 {
@@ -27,8 +50,13 @@ impl Direction {
 
 /* UPDATE */
 
-fn directionAtPoint(p: Point2) -> Direction {
-    todo!()
+fn directionAtPoint(model: &Model, p: Point2) -> Direction {
+    let v: Vec<Vec2> = model
+        .charges
+        .iter()
+        .map(|charge| charge.strengthAtPoint(p))
+        .collect();
+    Direction { v: v.iter().sum() }
 }
 
 fn update(_app: &App, _model: &mut Model, _update: Update) {}
@@ -65,13 +93,6 @@ fn view(app: &App, model: &Model, frame: Frame) {
         let end = pt2(p.x + 10.0, p.y + 10.0);
         draw.arrow().points(*p, end);
     });
-    // draw.polyline().weight(3.0).points_colored(points);
-    // let points = (0..500).map(|i| {
-    //     let x = i as f32 / 10.0 - 25.0; //subtract 25 to center the sine wave
-    //     let point = pt2(x, (x).cos()) * 20.0; //scale sine wave by 20.0
-    //     (point, ORANGE)
-    // });
-    // draw.polyline().weight(3.0).points_colored(points);
 
     draw.to_frame(app, &frame).unwrap();
 }
