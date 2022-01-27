@@ -19,17 +19,26 @@ fn view(app: &App, _model: &Model, frame: Frame) {
     // Clear the background to purple.
     draw.background().color(PLUM);
 
-    let points = (0..50).map(|i| {
-        let x = i as f32 - 25.0; //subtract 25 to center the sine wave
-        let point = pt2(x, x.sin()) * 20.0; //scale sine wave by 20.0
-        (point, STEELBLUE)
-    });
-    draw.polyline().weight(3.0).points_colored(points);
+    let xs = 0..50;
+    let ys = 0..50;
 
+    let multiplier: f32 = 10.0;
+    let points = xs
+        .map(|i| {
+            let x = i as f32;
+            ys.clone().map(move |j| {
+                let y = j as f32;
+                let point = pt2(x * multiplier, y * multiplier);
+                (point, STEELBLUE)
+            })
+        })
+        .flatten();
+
+    draw.polyline().weight(3.0).points_colored(points);
     let points = (0..500).map(|i| {
         let x = i as f32 / 10.0 - 25.0; //subtract 25 to center the sine wave
         let point = pt2(x, (x).cos()) * 20.0; //scale sine wave by 20.0
-        (point, STEELBLUE)
+        (point, ORANGE)
     });
     draw.polyline().weight(3.0).points_colored(points);
 
